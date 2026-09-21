@@ -18,10 +18,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -35,6 +37,7 @@ class PoolSweeperReapTest {
 
     private static final long WARN_THRESHOLD_MS = 1_000L;
     private static final long KILL_THRESHOLD_MS = 5_000L;
+    private static final long SLOW_ABORT_MS = 200L;
 
     private ConnectionTracker tracker;
     private RecordingWardenMetrics metrics;
@@ -115,6 +118,35 @@ class PoolSweeperReapTest {
     }
 
     @Test
+    void waitsForAnAsynchronousAbortBeforeReturningTheSlot() throws SQLException {
+        // pgjdbc's abort() only hands the teardown to the executor and returns. Closing before
+        // that task has run gives the pool a connection that still looks healthy, and HikariCP
+        // then lends it out again without checking -- just before it dies.
+        AtomicBoolean torndown = new AtomicBoolean(false);
+        AtomicBoolean closedAfterTeardown = new AtomicBoolean(false);
+        Connection connection = mock(Connection.class);
+        doAnswer(invocation -> {
+            Executor executor = invocation.getArgument(0);
+            executor.execute(() -> {
+                sleepQuietly(SLOW_ABORT_MS);
+                torndown.set(true);
+            });
+            return null;
+        }).when(connection).abort(any(Executor.class));
+        doAnswer(invocation -> {
+            closedAfterTeardown.set(torndown.get());
+            return null;
+        }).when(connection).close();
+        TrackedEntry entry = tracker.track(DATA_SOURCE_NAME, connection, false);
+
+        sweeper.sweep(nanosAfterCheckout(entry, KILL_THRESHOLD_MS));
+
+        verify(connection).close();
+        assertThat(closedAfterTeardown).isTrue();
+        assertThat(metrics.reapedAges()).hasSize(1);
+    }
+
+    @Test
     void doesNotReportAReapWhenTheDriverFailsEntirely() throws SQLException {
         Connection connection = mock(Connection.class);
         doThrow(new SQLException("connection already gone")).when(connection).abort(any());
@@ -184,6 +216,14 @@ class PoolSweeperReapTest {
 
         // One metric event per reaped round, so no entry was reaped twice.
         assertThat(metrics.reapedAges()).hasSize(reapedBefore + reapedRounds);
+    }
+
+    private static void sleepQuietly(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private long nanosAfterCheckout(TrackedEntry entry, long elapsedMillis) {

@@ -5,10 +5,15 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,8 +35,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * and its failures are expected rather than exceptional.
  *
  * <p>The abort itself runs on this reaper's own small pool: the driver is given that executor to
- * do its cleanup, and doing it off the sweeper thread keeps one hung driver from stalling all
- * further sweeps.
+ * do its cleanup. Some drivers (pgjdbc among them) only schedule the teardown there and return, so
+ * the reaper waits for it to finish before closing. Closing first would hand the pool a connection
+ * that still looks healthy; HikariCP skips its liveness check for recently used connections and
+ * would lend it out again moments before it dies. The wait is bounded, so one hung driver delays a
+ * sweep by at most {@value #ABORT_TIMEOUT_SECONDS} s instead of stalling it.
  */
 public final class ConnectionReaper implements AutoCloseable {
 
@@ -41,6 +49,7 @@ public final class ConnectionReaper implements AutoCloseable {
     private static final int QUEUE_CAPACITY = 64;
     private static final long IDLE_TIMEOUT_SECONDS = 30L;
     private static final long SHUTDOWN_TIMEOUT_SECONDS = 5L;
+    private static final long ABORT_TIMEOUT_SECONDS = 5L;
 
     private final ExecutorService abortExecutor;
     private final AtomicBoolean fallbackLogged = new AtomicBoolean(false);
@@ -80,9 +89,9 @@ public final class ConnectionReaper implements AutoCloseable {
 
     /** @return {@code true} if the physical connection was torn down. */
     private boolean abort(Connection connection) {
+        List<Future<?>> teardown = new CopyOnWriteArrayList<>();
         try {
-            connection.abort(abortExecutor);
-            return true;
+            connection.abort(command -> teardown.add(abortExecutor.submit(command)));
         } catch (SQLFeatureNotSupportedException | UnsupportedOperationException | AbstractMethodError e) {
             if (fallbackLogged.compareAndSet(false, true)) {
                 log.warn("JDBC driver {} does not support Connection.abort(); "
@@ -92,6 +101,31 @@ public final class ConnectionReaper implements AutoCloseable {
             return false;
         } catch (Exception e) {
             log.warn("Failed to abort leaked connection", e);
+            return false;
+        }
+        return awaitTeardown(teardown);
+    }
+
+    /**
+     * Waits for the work the driver scheduled during {@code abort()}. Drivers that tear down
+     * synchronously schedule nothing, and this returns at once.
+     */
+    private boolean awaitTeardown(List<Future<?>> teardown) {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(ABORT_TIMEOUT_SECONDS);
+        try {
+            for (Future<?> task : teardown) {
+                task.get(deadline - System.nanoTime(), TimeUnit.NANOSECONDS);
+            }
+            return true;
+        } catch (TimeoutException e) {
+            log.warn("JDBC driver did not finish aborting a leaked connection within {} s; "
+                    + "returning it to the pool anyway", ABORT_TIMEOUT_SECONDS);
+            return false;
+        } catch (ExecutionException e) {
+            log.warn("JDBC driver failed while aborting a leaked connection", e.getCause());
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             return false;
         }
     }
