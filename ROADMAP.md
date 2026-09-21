@@ -1,8 +1,8 @@
 # pool-warden — Road to release
 
-> Snapshot: 2026-09-22. Version `0.1.0-SNAPSHOT`. The repo is public at
-> [rizkywahyus/spring-pool-warden](https://github.com/rizkywahyus/spring-pool-warden); `v0.1.0`
-> gets tagged once CI is green.
+> Snapshot: 2026-09-22. Version `0.1.0`. The repo is public at
+> [rizkywahyus/spring-pool-warden](https://github.com/rizkywahyus/spring-pool-warden) and `v0.1.0`
+> is tagged.
 
 ## 1. Current status
 
@@ -21,12 +21,12 @@
 | README with honest trade-offs | ✅ | Includes JMH numbers |
 | Tests | ✅ 50 tests | `./mvnw clean verify` green locally; coverage core 86%, starter 93% |
 | HikariCP / Tomcat JDBC / DBCP2 matrix | ✅ | Capacity-recovery test for all three |
-| Testcontainers PostgreSQL | ⚠️ | Written, but never passed yet: skipped locally (no Docker), suspected cause of the CI failure |
+| Testcontainers PostgreSQL | ✅ | Skipped locally without Docker; runs and passes in CI |
 | JMH benchmark | ✅ | `pool-warden-benchmark` module |
 | LICENSE + CI (JDK 17 & 21) + jitpack.yml + CHANGELOG | ✅ | |
 | GitHub repo + push `main` | ✅ | `rizkywahyus/spring-pool-warden` |
-| CI green on GitHub | ⏳ | First run failed: `PostgresReapTest` exposed a real reap bug with async-abort drivers (fixed, see §2) |
-| Release tag `v0.1.0` + JitPack | ⬜ | Blocked on CI |
+| CI green on GitHub | ✅ | JDK 17 and 21; the first run caught a real reap bug with async-abort drivers (see §2) |
+| Release tag `v0.1.0` + JitPack | ⏳ | Tagged; JitPack build pending |
 | Spring Boot 4 | ⬜ | See §3 Milestone 4 |
 
 ## 2. P0 resolved
@@ -63,8 +63,8 @@ P2.5 ignored `ageMillis`.
 ### Milestone 3 — Release `v0.1.0`
 - [x] Create the GitHub repo `rizkywahyus/spring-pool-warden` and push `main`. The username
       matches `groupId io.github.rizkywahyus`, which Maven Central will require later.
-- [ ] Get CI green on JDK 17 and 21, including the Testcontainers PostgreSQL test. The first run
-      failed on both JDKs in `PostgresReapTest` (async abort, fixed in §2); waiting on the re-run.
+- [x] Get CI green on JDK 17 and 21, including the Testcontainers PostgreSQL test. The first run
+      failed on both JDKs in `PostgresReapTest` (async abort, fixed in §2).
 - [ ] Tag `v0.1.0`, confirm the JitPack build is green, verify the install snippet in the README.
 - [ ] (Optional) Maven Central: add `<url>`, `<scm>`, `<developers>` to the pom;
       `maven-source-plugin`, `maven-javadoc-plugin`, `maven-gpg-plugin`,
@@ -88,8 +88,8 @@ P2.5 ignored `ageMillis`.
 ## 4. Definition of done for `v0.1.0`
 
 - [x] REAP is proven to recover pool capacity on HikariCP, Tomcat JDBC and DBCP2 (automated test).
-- [ ] Testcontainers PostgreSQL proves the backend disappears from `pg_stat_activity` (needs a green CI run).
+- [x] Testcontainers PostgreSQL proves the backend disappears from `pg_stat_activity` (CI).
 - [x] The README carries the JMH numbers and makes no untested claims.
 - [x] GitHub repo exists and CI runs on every push to `main`.
-- [ ] CI green on JDK 17 and 21.
+- [x] CI green on JDK 17 and 21.
 - [ ] The artifact resolves from JitPack with the snippet in the README.

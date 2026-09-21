@@ -110,7 +110,7 @@ afterwards in logs.
 
 ```bash
 ./mvnw -q -DskipTests package
-java -jar pool-warden-demo/target/pool-warden-demo-0.1.0-SNAPSHOT.jar
+java -jar pool-warden-demo/target/pool-warden-demo-0.1.0.jar
 
 curl localhost:8080/normal   # borrows and returns a connection properly
 curl localhost:8080/leak     # borrows one and never closes it
@@ -123,7 +123,7 @@ curl localhost:8080/release  # hand the leaked connections back
 Watch reaping instead:
 
 ```bash
-java -jar pool-warden-demo/target/pool-warden-demo-0.1.0-SNAPSHOT.jar \
+java -jar pool-warden-demo/target/pool-warden-demo-0.1.0.jar \
   --pool-warden.mode=REAP --pool-warden.warn-threshold=3s --pool-warden.kill-threshold=6s
 curl localhost:8080/leak
 # WARN ... Reclaimed connection held for 7454 ms (kill threshold 6000 ms) ...

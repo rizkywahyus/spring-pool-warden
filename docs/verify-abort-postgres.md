@@ -23,7 +23,7 @@ docker run --rm -d --name pw-pg \
 ## 2. Point the demo at it
 
 ```bash
-java -jar pool-warden-demo/target/pool-warden-demo-0.1.0-SNAPSHOT.jar \
+java -jar pool-warden-demo/target/pool-warden-demo-0.1.0.jar \
   --spring.datasource.url=jdbc:postgresql://localhost:5432/warden \
   --spring.datasource.username=postgres \
   --spring.datasource.password=warden \
