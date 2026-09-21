@@ -27,5 +27,5 @@ First release.
   the backend is gone from `pg_stat_activity`.
 - JMH benchmarks for the checkout path.
 
-[Unreleased]: https://github.com/rizkywahyus/pool-warden/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/rizkywahyus/pool-warden/releases/tag/v0.1.0
+[Unreleased]: https://github.com/rizkywahyus/spring-pool-warden/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/rizkywahyus/spring-pool-warden/releases/tag/v0.1.0

@@ -49,7 +49,7 @@ P2.5 `ageMillis` yang terabaikan.
 ## 3. Sisa pekerjaan
 
 ### Milestone 3 — Rilis `v0.1.0`
-- [ ] Buat repo GitHub `rizkywahyus/pool-warden` (username harus cocok dengan
+- [ ] Buat repo GitHub `rizkywahyus/spring-pool-warden` (username harus cocok dengan
       `groupId io.github.rizkywahyus` kalau nanti ke Maven Central), push `main`.
 - [ ] Cek CI hijau di JDK 17 dan 21, termasuk test Testcontainers PostgreSQL.
 - [ ] Tag `v0.1.0`, pastikan build JitPack hijau, verifikasi snippet install di README.

@@ -1,7 +1,7 @@
 # pool-warden
 
-[![build](https://github.com/rizkywahyus/pool-warden/actions/workflows/build.yml/badge.svg)](https://github.com/rizkywahyus/pool-warden/actions/workflows/build.yml)
-[![JitPack](https://jitpack.io/v/rizkywahyus/pool-warden.svg)](https://jitpack.io/#rizkywahyus/pool-warden)
+[![build](https://github.com/rizkywahyus/spring-pool-warden/actions/workflows/build.yml/badge.svg)](https://github.com/rizkywahyus/spring-pool-warden/actions/workflows/build.yml)
+[![JitPack](https://jitpack.io/v/rizkywahyus/spring-pool-warden.svg)](https://jitpack.io/#rizkywahyus/spring-pool-warden)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 Finds leaked JDBC connections while they are still leaking — and, if you let it, takes them back.
@@ -31,7 +31,7 @@ app.getConnection()
 
 ## Install
 
-Java 17+ and Spring Boot 3.5.x. Released through [JitPack](https://jitpack.io/#rizkywahyus/pool-warden):
+Java 17+ and Spring Boot 3.5.x. Released through [JitPack](https://jitpack.io/#rizkywahyus/spring-pool-warden):
 
 ```xml
 <repositories>
@@ -42,7 +42,7 @@ Java 17+ and Spring Boot 3.5.x. Released through [JitPack](https://jitpack.io/#r
 </repositories>
 
 <dependency>
-  <groupId>com.github.rizkywahyus.pool-warden</groupId>
+  <groupId>com.github.rizkywahyus.spring-pool-warden</groupId>
   <artifactId>pool-warden-spring-boot-starter</artifactId>
   <version>v0.1.0</version>
 </dependency>
@@ -51,7 +51,7 @@ Java 17+ and Spring Boot 3.5.x. Released through [JitPack](https://jitpack.io/#r
 ```groovy
 repositories { maven { url 'https://jitpack.io' } }
 
-implementation 'com.github.rizkywahyus.pool-warden:pool-warden-spring-boot-starter:v0.1.0'
+implementation 'com.github.rizkywahyus.spring-pool-warden:pool-warden-spring-boot-starter:v0.1.0'
 ```
 
 No code changes: the starter wraps every pooled `DataSource` bean automatically. Data sources
