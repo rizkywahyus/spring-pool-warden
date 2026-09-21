@@ -26,7 +26,7 @@
 | LICENSE + CI (JDK 17 & 21) + jitpack.yml + CHANGELOG | ✅ | |
 | GitHub repo + push `main` | ✅ | `rizkywahyus/spring-pool-warden` |
 | CI green on GitHub | ✅ | JDK 17 and 21; the first run caught a real reap bug with async-abort drivers (see §2) |
-| Release tag `v0.1.0` + JitPack | ⏳ | Tagged; JitPack build pending |
+| Release tag `v0.1.0` + JitPack | ✅ | README snippet resolves from a clean local repo |
 | Spring Boot 4 | ⬜ | See §3 Milestone 4 |
 
 ## 2. P0 resolved
@@ -65,7 +65,7 @@ P2.5 ignored `ageMillis`.
       matches `groupId io.github.rizkywahyus`, which Maven Central will require later.
 - [x] Get CI green on JDK 17 and 21, including the Testcontainers PostgreSQL test. The first run
       failed on both JDKs in `PostgresReapTest` (async abort, fixed in §2).
-- [ ] Tag `v0.1.0`, confirm the JitPack build is green, verify the install snippet in the README.
+- [x] Tag `v0.1.0`, confirm the JitPack build is green, verify the install snippet in the README.
 - [ ] (Optional) Maven Central: add `<url>`, `<scm>`, `<developers>` to the pom;
       `maven-source-plugin`, `maven-javadoc-plugin`, `maven-gpg-plugin`,
       `central-publishing-maven-plugin`; verify the namespace in the Central Portal; make sure
@@ -92,4 +92,4 @@ P2.5 ignored `ageMillis`.
 - [x] The README carries the JMH numbers and makes no untested claims.
 - [x] GitHub repo exists and CI runs on every push to `main`.
 - [x] CI green on JDK 17 and 21.
-- [ ] The artifact resolves from JitPack with the snippet in the README.
+- [x] The artifact resolves from JitPack with the snippet in the README.
