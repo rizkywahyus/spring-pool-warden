@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:demo;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 5
+
+# Thresholds are deliberately tiny so a leak is visible within seconds.
+pool-warden:
+  mode: WARN_ONLY   # switch to REAP to see connections force-reclaimed
+  warn-threshold: 5s
+  kill-threshold: 20s
+  sweep-interval: 2s
+  capture-stack-trace: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,poolwarden,prometheus
+
+logging:
+  level:
+    io.github.rizkywahyus.poolwarden: DEBUG

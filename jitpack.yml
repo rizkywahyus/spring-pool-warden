@@ -1,0 +1,3 @@
+# JitPack still defaults to an older JDK than this build needs.
+jdk:
+  - openjdk17
