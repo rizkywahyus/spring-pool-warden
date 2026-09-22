@@ -1,4 +1,4 @@
-# pool-warden
+# Spring Pool Warden
 
 [![build](https://github.com/rizkywahyus/spring-pool-warden/actions/workflows/build.yml/badge.svg)](https://github.com/rizkywahyus/spring-pool-warden/actions/workflows/build.yml)
 [![JitPack](https://jitpack.io/v/rizkywahyus/spring-pool-warden.svg)](https://jitpack.io/#rizkywahyus/spring-pool-warden)
